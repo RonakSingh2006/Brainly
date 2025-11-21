@@ -1,0 +1,101 @@
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import * as z from "zod";
+import bcrypt from "bcrypt";
+import { UserModel } from "./db.js";
+const app = express();
+app.use(express.json());
+app.post("/api/v1/signup", async (req, res) => {
+    const UserSchema = z.object({
+        username: z.string().min(3, "min length is 3").max(10, "max length is 10"),
+        password: z.string().min(8, "min length is 8").max(20, "max length is 20").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, "password must contain a small , large and special character and a number")
+    });
+    const result = UserSchema.safeParse(req.body);
+    if (!result.success) {
+        res.status(411).send({
+            heading: "Error in Input",
+            message: result.error
+        });
+    }
+    else {
+        const currUser = result.data;
+        const hashedPassword = await bcrypt.hash(currUser.password, 10);
+        currUser.password = hashedPassword;
+        try {
+            await UserModel.create(currUser);
+            res.send("Sucessfully Signed In");
+        }
+        catch (err) {
+            if (err.code === 11000) {
+                res.status(403).send("user Already exsist");
+            }
+            else {
+                res.status(500).send("server error : " + err.message);
+            }
+        }
+    }
+});
+app.post("/api/v1/signin", async (req, res) => {
+    const UserSchema = z.object({
+        username: z.string().min(3).max(10),
+        password: z.string().min(1)
+    });
+    const result = UserSchema.safeParse(req.body);
+    if (!result.success) {
+        res.status(400).send({
+            heading: "Invalid Input",
+            message: result.error
+        });
+    }
+    else {
+        const { username, password } = result.data;
+        try {
+            console.log(username);
+            const data = await UserModel.findOne({ username: username });
+            console.log(data);
+            if (data) {
+                const verify = await bcrypt.compare(password, data.password);
+                if (verify) {
+                    const token = jwt.sign(username, process.env.JWT_KEY);
+                    res.send({
+                        message: "Logged In",
+                        token
+                    });
+                }
+                else {
+                    res.status(401).send("Incorrect Password");
+                }
+            }
+            else {
+                res.status(404).send("User Does not exsist");
+            }
+        }
+        catch (err) {
+            res.status(500).send("Server Error : " + err);
+        }
+    }
+});
+// app.post("/api/v1/content",(req,res)=>{
+// })
+// app.get("/api/v1/content",(req,res)=>{
+// })
+// app.delete("/api/v1/content",(req,res)=>{
+// })
+const url = process.env.MONGO_URL ?? "mongodb://localhost:27017/brainly";
+export async function connectDB() {
+    try {
+        await mongoose.connect(url, {
+            dbName: "brainly"
+        });
+        console.log("Connection Sucessfull");
+    }
+    catch (err) {
+        console.log("Connection Failed ", err);
+    }
+}
+connectDB();
+app.listen(3000);
+//# sourceMappingURL=index.js.map
