@@ -100,9 +100,10 @@ app.post("/api/v1/signin",async (req,res)=>{
   }
 })
 
+const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId");
+
 app.post("/api/v1/content",authMiddleware, async (req,res)=>{
 
-  const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId");
 
   const contentSchema = z.object({
     link : z.string(),
@@ -123,11 +124,11 @@ app.post("/api/v1/content",authMiddleware, async (req,res)=>{
     const {title,link,type,tags} = result.data;
 
     try{
-      const id = await ContentModel.create({title,link,type,tags,userId : req.userId});
+      const contenet = await ContentModel.create({title,link,type,tags,userId : req.userId});
 
       res.send({
         message : "Successfully Uploaded",
-        contentId : id
+        contentId : contenet._id
       })
 
     }
@@ -151,9 +152,36 @@ app.get("/api/v1/content",authMiddleware,async (req,res)=>{
   }
 })
 
-// app.delete("/api/v1/content",(req,res)=>{
-  
-// })
+app.delete("/api/v1/content",authMiddleware,async (req,res)=>{
+  const userId = req.userId;
+  const IdSchema = z.object({
+    contentId : objectIdSchema
+  })
+
+  const result = IdSchema.safeParse(req.body);
+
+  if(!result.success){
+    return res.status(400).send("Invalid ContentId");
+  }
+
+  const {contentId} = result.data;
+
+  try{
+    let content = await ContentModel.findOne({_id : contentId});
+
+    if(!content){
+      return res.status(400).send("No Contenet available to delete");
+    }
+
+
+    await ContentModel.deleteOne({userId, _id : contentId});
+
+    return res.send("Sucessfully deleted");
+  }
+  catch(err){
+    return res.status(500).send("Server Error : "+err);
+  }
+})
 
 const url = process.env["MONGO_URL"] ?? "mongodb://localhost:27017/brainly";
 
