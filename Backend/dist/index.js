@@ -5,7 +5,8 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import * as z from "zod";
 import bcrypt from "bcrypt";
-import { UserModel } from "./db.js";
+import { ContentModel, UserModel } from "./db.js";
+import { authMiddleware } from "./middleWare.js";
 const app = express();
 app.use(express.json());
 app.post("/api/v1/signup", async (req, res) => {
@@ -55,13 +56,12 @@ app.post("/api/v1/signin", async (req, res) => {
         try {
             console.log(username);
             const data = await UserModel.findOne({ username: username });
-            console.log(data);
             if (data) {
                 const verify = await bcrypt.compare(password, data.password);
                 if (verify) {
-                    const token = jwt.sign(username, process.env.JWT_KEY);
+                    const token = jwt.sign({ id: data._id }, process.env["JWT_SECRET"]);
                     res.send({
-                        message: "Logged In",
+                        message: "Signed In",
                         token
                     });
                 }
@@ -78,13 +78,40 @@ app.post("/api/v1/signin", async (req, res) => {
         }
     }
 });
-// app.post("/api/v1/content",(req,res)=>{
-// })
+app.post("/api/v1/content", authMiddleware, async (req, res) => {
+    const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId");
+    const contentSchema = z.object({
+        link: z.string(),
+        type: z.enum(['image', 'video', 'audio', 'article']),
+        title: z.string(),
+        tags: z.array(objectIdSchema)
+    });
+    const result = contentSchema.safeParse(req.body);
+    if (!result.success) {
+        res.status(400).send({
+            message: "Invalid Inputs",
+            error: result.error
+        });
+    }
+    else {
+        const { title, link, type, tags } = result.data;
+        try {
+            const id = await ContentModel.create({ title, link, type, tags, userId: req.userId });
+            res.send({
+                message: "Successfully Uploaded",
+                contentId: id
+            });
+        }
+        catch (err) {
+            res.status(500).send("Error while Uploading content " + err);
+        }
+    }
+});
 // app.get("/api/v1/content",(req,res)=>{
 // })
 // app.delete("/api/v1/content",(req,res)=>{
 // })
-const url = process.env.MONGO_URL ?? "mongodb://localhost:27017/brainly";
+const url = process.env["MONGO_URL"] ?? "mongodb://localhost:27017/brainly";
 export async function connectDB() {
     try {
         await mongoose.connect(url, {
