@@ -215,7 +215,7 @@ app.post("/api/v1/brain/share",authMiddleware,async (req,res)=>{
 
         res.send({
           message : "Link Created Sucessfully",
-          link : `http://127.0.0.1/api/v1/brain/:${hash}`
+          link : `http://127.0.0.1:3000/api/v1/brain/${hash}`
         });
       }
       else{
@@ -233,9 +233,30 @@ app.post("/api/v1/brain/share",authMiddleware,async (req,res)=>{
   }
 })
 
-// app.get("/api/v1/brain/:shareLink",(req,res)=>{
+app.get("/api/v1/brain/:shareLink",async (req,res)=>{
+  const hash = req.params.shareLink;
 
-// })
+  try{
+    let data = await LinkModel.findOne({hash}).populate('userId','username');
+
+    if(!data){
+      res.status(411).send("Invalid link");
+    }
+    else{
+
+      const content = await ContentModel.find({userId : data.userId});
+
+      res.send({
+        user : data.userId,
+        content
+      })
+    }
+
+  }
+  catch(err){
+    res.status(500).send("Server Error : "+err);
+  }
+})
 
 const url = process.env["MONGO_URL"] ?? "mongodb://localhost:27017/brainly";
 
