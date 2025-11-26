@@ -10,7 +10,7 @@ interface CardProps{
 }
 
 export function Card(props :CardProps){
-  return <div className="border border-gray-200 shadow-md w-72 min-h-48 rounded-md">
+  return <div className="border border-gray-200 bg-white shadow-md w-72 min-h-48 rounded-md">
     <div className="flex justify-between m-3 items-center">
       <div className="flex items-center gap-3">
         {props.type === "tweet" ? <Twitter/> : <YouTube/>}
