@@ -2,14 +2,20 @@ import { Button } from "./components/Button"
 import { Plus } from "./icons/Plus"
 import { Share } from "./icons/Share"
 import { Card } from "./components/Card"
+import { AddContent } from "./components/AddContent"
+import { useState } from "react"
 
 function App() {
 
+  const [open,setOpen] = useState(false);
+
   return (
     <>
+      <AddContent open={open} onClose={()=>{setOpen(false)}}/>
+
       <div className="flex justify-end gap-4">
         <Button startIcon={<Share/>} variant="primary" size="md" text="Share Brain" onClick={()=>console.log("hello")}/>
-        <Button startIcon={<Plus/>} variant="secondry" size="md" text="Add Content" onClick={()=>console.log("hello")}/>
+        <Button startIcon={<Plus/>} variant="secondry" size="md" text="Add Content" onClick={()=>setOpen(true)}/>
       </div>
       
       <div className="flex gap-4">
