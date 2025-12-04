@@ -1,5 +1,6 @@
 import { Cross } from "../icons/Cross"
 import { Button } from "./Button"
+import { Input } from "./Input"
 
 export function AddContent({open,onClose} : {open : boolean , onClose : ()=>void}){
   return<>
@@ -21,10 +22,4 @@ export function AddContent({open,onClose} : {open : boolean , onClose : ()=>void
       </div>
     </div>}
   </>
-}
-
-export function Input({placeholder} : {placeholder:string}){
-  return <div className="border text-xl my-4 rounded">
-    <input type="text" placeholder={placeholder} className="p-2"/>
-  </div>
 }
