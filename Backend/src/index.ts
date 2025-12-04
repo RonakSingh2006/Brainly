@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken"
 import * as z from "zod"
 import bcrypt from "bcrypt"
 import { ContentModel, UserModel,LinkModel } from "./db.js";
+import cors from 'cors'
 
 import { authMiddleware } from "./middleWare.js";
 import { generateRandomHash } from "./utils.js";
@@ -14,6 +15,8 @@ import { generateRandomHash } from "./utils.js";
 const app = express();
 
 app.use(express.json());
+
+app.use(cors());
 
 app.post("/api/v1/signup",async (req,res)=>{
   const UserSchema = z.object({
