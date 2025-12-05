@@ -5,10 +5,13 @@ import { Card } from "../components/Card"
 import { AddContent } from "../components/AddContent"
 import { useState } from "react"
 import { SideBar } from "../components/SideBar"
+import { useContent } from "../hooks/useContent"
 
 function DashBoard() {
 
   const [open,setOpen] = useState(false);
+
+  const contents = useContent();
 
   return (
     <>
@@ -23,12 +26,7 @@ function DashBoard() {
         </div>
         
         <div className="gap-2 flex flex-wrap mx-2 mt-5 items-start">
-          <Card title="Pakistan" link="https://x.com/virendersehwag/status/1921236534935666812" type="tweet"/>
-          <Card title="n8n" link="https://www.youtube.com/watch?v=NYCUMKUBcXM" type="youtube"/>
-          <Card title="Pakistan" link="https://x.com/virendersehwag/status/1921236534935666812" type="tweet"/>
-          <Card title="n8n" link="https://www.youtube.com/watch?v=NYCUMKUBcXM" type="youtube"/>
-          <Card title="Pakistan" link="https://x.com/virendersehwag/status/1921236534935666812" type="tweet"/>
-          <Card title="n8n" link="https://www.youtube.com/watch?v=NYCUMKUBcXM" type="youtube"/>
+          {contents.map( e => <Card title={e.title} link={e.link} type={e.type} key={e._id}/>)}
         </div>
       </div>
     </>

@@ -21,7 +21,7 @@ export function SignIn(){
     })
 
 
-    localStorage.setItem('token',output.data.token);
+    localStorage.setItem('auth',`Bearer ${output.data.token}`);
 
     if(usernameRef.current) usernameRef.current.value = "";
     if (passwordRef.current) passwordRef.current.value = "";

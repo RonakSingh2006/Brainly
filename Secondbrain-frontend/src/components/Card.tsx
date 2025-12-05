@@ -5,7 +5,7 @@ import { YouTube } from "../icons/Youtube"
 
 interface CardProps{
   title : string,
-  type : "youtube" | "tweet",
+  type : "youtube" | "twitter",
   link : string
 }
 
@@ -13,7 +13,7 @@ export function Card(props :CardProps){
   return <div className="border border-gray-200 bg-white shadow-md w-72 min-h-48 rounded-md">
     <div className="flex justify-between m-3 items-center">
       <div className="flex items-center gap-3">
-        {props.type === "tweet" ? <Twitter/> : <YouTube/>}
+        {props.type === "twitter" ? <Twitter/> : <YouTube/>}
         {props.title}
       </div>
       <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export function Card(props :CardProps){
 
     <div className="p-2">
       
-      {props.type === "tweet" && <blockquote className="twitter-tweet">
+      {props.type === "twitter" && <blockquote className="twitter-twitter">
         <a href={props.link.replace("x","twitter")}></a> 
       </blockquote>}
 

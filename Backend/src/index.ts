@@ -111,7 +111,7 @@ app.post("/api/v1/content",authMiddleware, async (req,res)=>{
 
   const contentSchema = z.object({
     link : z.string(),
-    type : z.enum(['image','video','audio','article']),
+    type : z.enum(['youtube','twitter']),
     title : z.string(),
     tags : z.array(objectIdSchema)
   })
